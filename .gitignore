@@ -2,3 +2,7 @@
 node_modules
 backupCoverLetter.txt
 .DS_Store
+public
+resume.json
+build
+coverLetter.pdf

@@ -48,9 +48,8 @@ Best Regards,
 
 ${process.env.FIRSTNAME}
 
-${process.env.PHONENUMBER} | ${process.env.EMAIL}
 ${process.env.WEBSITE}
+
 ${process.env.LINKEDIN} | ${process.env.GITHUB}
-`
-  );
+`);
 }

@@ -11,7 +11,6 @@ module.exports = {
   ) {
     return new Promise((resolve, reject) => {
       const listContainers = handleSelectorFunc(listContainersPath);
-
       listContainers.forEach((container, index) => {
         container.addEventListener('click', (event) => {
           event.preventDefault();
@@ -51,6 +50,12 @@ module.exports = {
 
             const iframe = handleSelectorFunc(iframePath);
 
+            const buttonContainer = iframe.contentWindow.document.getElementById('indeedApplyButtonContainer');
+
+            buttonContainer.style.pointerEvents = 'none';
+            const actualButton = iframe.contentWindow.document.getElementById('indeedApplyButton');
+            actualButton.setAttribute('style', 'background-color: gray !important')
+
             const jobDescription = handleSkills(iframe.contentWindow.document.getElementById("jobDescriptionText").textContent);
 
             const strongContainer = generateRelevantSkillContainer(iframe, jobDescription.strong, 'goldenrod');
@@ -85,6 +90,11 @@ module.exports = {
 
           container.appendChild(applyButtonHanger);
         });
+        // On-load trigger the matching skills for the first container.
+        if (index === 0) {
+          console.log(container);
+          container.click();
+        }
       })
     });
   }),
@@ -189,20 +199,20 @@ module.exports = {
           // if (classtype === 'demographicInfo') {
           //   coverLetterDataObj[title] = { orderIndex: orderIndex, value: value, defaultValue: defaultValue };
           // } else {
-            // If it doesn't exist...
-            if (!coverLetterDataObj[classtype]) {
-              coverLetterDataObj[classtype] = {
-                orderIndex: orderIndex,
-                data: [
-                  { title: title, value: value, defaultValue: defaultValue }
-                ],
-              }
-            } else {
-              // Otherwise Add to The pile
-              coverLetterDataObj[classtype] = {
-                orderIndex: orderIndex,
-                data: [...coverLetterDataObj[classtype]['data'], { title: title, value: value, defaultValue: defaultValue }]
-              }
+          // If it doesn't exist...
+          if (!coverLetterDataObj[classtype]) {
+            coverLetterDataObj[classtype] = {
+              orderIndex: orderIndex,
+              data: [
+                { title: title, value: value, defaultValue: defaultValue }
+              ],
+            }
+          } else {
+            // Otherwise Add to The pile
+            coverLetterDataObj[classtype] = {
+              orderIndex: orderIndex,
+              data: [...coverLetterDataObj[classtype]['data'], { title: title, value: value, defaultValue: defaultValue }]
+            }
             // }
           }
           allInputEntries[i].disabled = true;

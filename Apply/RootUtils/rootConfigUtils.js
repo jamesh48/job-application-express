@@ -22,22 +22,24 @@ module.exports = {
     let preppedTitle = searchJobTitle.split(' ');
     preppedTitle = preppedTitle.join('%20');
     const startUrl = `https://www.indeed.com/jobs?q=${preppedTitle}&l=${searchJobLocation}&sort=date&limit=50`;
+    // const startUrl = `http://demo.guru99.com/test/upload/`;
     await driver.get(startUrl);
     await driver.manage().window().maximize();
   },
-  filterJobPostings: (driver) => {
+  filterJobPostings: async (driver) => {
     // Remove Jobs with external Postings.
-    driver.executeScript(
+    await driver.executeScript(
       `document.querySelectorAll('.tapItem').forEach((tapItemNode) => {
-      let test = tapItemNode.querySelector('.indeedApply');
-      if (!test) {
+      const indeedApplyTest = tapItemNode.querySelector('.indeedApply');
+      if (!indeedApplyTest) {
         tapItemNode.remove();
       }
-    })`
+    })
+    `
     )
 
     // Remove Already Applied jobs from the list
-    driver.executeScript(`
+    await driver.executeScript(`
       const nodeList = document.querySelectorAll('.applied-snippet');
 
       nodeList.forEach((node) => {

@@ -1,3 +1,4 @@
+require('dotenv').config('../../.env');
 module.exports = {
   firstName: process.env.FIRSTNAME,
   lastName: process.env.LASTNAME,

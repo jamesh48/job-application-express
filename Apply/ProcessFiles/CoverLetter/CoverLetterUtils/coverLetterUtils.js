@@ -1,5 +1,5 @@
 const { Builder, By, Key, until, WebDriver } = require('selenium-webdriver');
-
+const { Promise } = require('bluebird');
 module.exports = {
   parseFunction: (str) => {
     var fn_body_idx = str.indexOf('{'),
@@ -19,24 +19,76 @@ module.exports = {
     return new Fn();
   },
 
-  getJobAndCompanyName: async (driver, pathToJobTitle, pathToCompanyNameSpan, pathToCompanyNameLink) => {
+  getJobAndCompanyName: async (driver, pathToJobTitle, pathToCompanyNameSpan, pathToCompanyNameLink, pathToAdvertisedSalary, pathToRemoteIndication, pathToPostURL, pathToJobLocation) => {
 
     const jobTitle = await driver.findElement(By.xpath(pathToJobTitle)).getText();
+
+    const postURL = await driver.findElement(By.xpath(pathToPostURL)).getAttribute("href");
+
+    let jobLocation = await driver.findElement(By.xpath(pathToJobLocation)).getText();
+
+    let jobLocationsToRemove = await driver.findElements(By.xpath(`//*[contains(@class, 'vjs-highlight')]//div[contains(@class, 'companyLocation')]//span`));
+
+    await Promise.each(jobLocationsToRemove, async (x) => {
+      const textToRemove = await x.getText();
+      jobLocation = jobLocation.replace(textToRemove, '');
+    })
+
+    const advertisedSalaryTest = await driver.findElements(By.xpath(pathToAdvertisedSalary));
+
+    const advertisedSalary = advertisedSalaryTest.length ? await advertisedSalaryTest[0].getText() : 'Salary Not Advertised';
+
+    const remoteTest = await driver.findElements(By.xpath(pathToRemoteIndication));
+    const remote = remoteTest.length ? true : false;
 
     const spanTest = await driver.findElements(By.xpath(pathToCompanyNameSpan));
 
     if (spanTest.length) {
       const companyName = await spanTest[0].getText();
-      return { jobTitle: jobTitle, companyName: companyName }
+      return { jobTitle: jobTitle, companyName: companyName, advertisedSalary: advertisedSalary, postURL: postURL, jobLocation: jobLocation, jobIsRemote: remote }
     }
 
     const linkTest = await driver.findElements(By.xpath(pathToCompanyNameLink));
 
     if (linkTest.length) {
       const companyName = await linkTest[0].getText();
-      return { jobTitle: jobTitle, companyName: companyName };
+      return { jobTitle: jobTitle, postURL: postURL, companyName: companyName, advertisedSalary: advertisedSalary, jobLocation: jobLocation, jobIsRemote: remote };
     }
 
+  },
+  disableInitialApplyButton: async (driver) => {
+    try {
+      await driver.switchTo().frame(0);
+      await driver.executeScript(
+        `
+        let firstItemIndeedApply = document.getElementById('indeedApplyButtonContainer');
+
+        if (firstItemIndeedApply) {
+          firstItemIndeedApply.style.pointerEvents = 'none';
+          document.getElementById('indeedApplyButton').setAttribute('style', 'background-color: gray !important');
+        };
+        `
+      )
+      await driver.switchTo().defaultContent();
+      return;
+    } catch (err) {
+      console.log(err);
+    }
+  },
+  autoStartSurvey: async (driver) => {
+    try {
+      await driver.switchTo().frame(0);
+      await driver.executeScript(
+        `
+        document.getElementById('indeedApplyButtonContainer').style.pointerEvents = 'initial';
+        document.getElementById('indeedApplyButton').setAttribute('style', 'background-color: goldenrod !important');
+        `
+      )
+      await driver.findElement(By.id('indeedApplyButton')).click();
+      await driver.switchTo().defaultContent();
+    } catch (err) {
+      console.log(err);
+    }
   },
   generateRelevantSkillsObj: async (driver, jobDescriptionTextPath) => {
 
@@ -54,7 +106,7 @@ module.exports = {
       await driver.switchTo().defaultContent();
 
       // Return Data
-      return relevantSkillsObj;
+      return [jobDescription, relevantSkillsObj];
     } catch (err) {
       console.log(err);
     }
@@ -368,7 +420,7 @@ module.exports = {
       },
       // Backend Skils
       {
-        sentence: 'backend frameworks like Express, Node, and NGINX',
+        sentence: 'backend server frameworks like Express and Node',
         skillSet: 'Backend Skills (n)',
         skillSets: [
           {
@@ -645,7 +697,7 @@ module.exports = {
       },
 
       {
-        sentence: 'paradigms such as MVC, Agile Methodology, Github Version Control, the importance of iterative development, and collaborative synergy',
+        sentence: 'thorough understanding and appreciation for modern industry paradigms such as MVC, Agile Methodology, Github Version Control, the importance of iterative development, and collaborative synergy',
         skillSet: 'Paradigms (n)',
         skillSets: [
           {

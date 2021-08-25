@@ -1,36 +1,27 @@
-const { By, Key, until } = require('selenium-webdriver');
-const { firstName, lastName, phoneNumber, location, recentJobTitle, recentJobWork } = require('./surveyConfig.js');
+const { keyTap, typeString } = require("robotjs");
+const { By, Key } = require('selenium-webdriver');
+const { firstName, lastName, phoneNumber } = require('./surveyConfig.js');
+
 
 module.exports = {
   continueApp: async (driver) => {
-    await driver.findElement(By.className('ia-continueButton')).click();
+    try {
+      await driver.findElement(By.className('ia-continueButton')).click();
+    } catch (err) {
+      console.log(err);
+    };
   },
   enterBasicInfo: async (driver) => {
-    await driver.wait(until.elementLocated(By.className('ia-BasePage-heading')));
-    // Basic Info->
-    await driver.findElement(By.tagName('input')).sendKeys(firstName.toString(), Key.TAB, lastName.toString(), Key.TAB, phoneNumber.toString());
-
-    let locationTest = await driver.findElements(By.id('input-location'));
-    if (locationTest.length > 0) {
-      await driver.findElement(By.id('input-location')).sendKeys(location.toString());
-    }
+    try {
+      await driver.findElement(By.tagName('input')).sendKeys(firstName.toString(), Key.TAB, lastName.toString(), Key.TAB, phoneNumber.toString());
+    } catch (err) {
+      console.log(err);
+    };
   },
-  enterResume: async (driver) => {
-    await driver.wait(until.elementLocated(By.className('ia-SmartApplyCard')));
-    await driver.findElement(By.className('ia-SmartApplyCard')).click();
-    await driver.sleep(1000);
-  },
-  enterCoverLetter: async (driver, coverLetter) => {
-    await driver.sleep(1500);
-
-    let coverLetterTest = await driver.findElements(By.id('cover-letter-label'));
-
-    if (coverLetterTest.length > 0) {
-      await driver.findElement(By.xpath(`//*[contains(@id, 'write-cover-letter-selection-card')]//div//span`)).click();
-
-      try {
-        await driver.executeScript(
-          `
+  setWrittenCoverLetter: async (driver, coverLetter) => {
+    try {
+      await driver.executeScript(
+        `
             ((selector, value) => {
               const el = document.querySelector(selector);
               if (el) {
@@ -44,34 +35,77 @@ module.exports = {
                 el.dispatchEvent(new Event('change', { bubbles: true }));
               }
               return el;
-            })('#coverletter-textarea', ${JSON.stringify(coverLetter)})
+            })('#coverletter-textarea', ${JSON.stringify(coverLetter)});
             `
-        );
+      );
+    } catch (err) {
+      console.log('execute cover letter entry script error-> ')
+      console.log(err);
+    }
+  },
+  automatePDFUpload: async (driver) => {
+    await driver.sleep(1500);
+    keyTap('2', 'command');
+    await driver.sleep(500);
+    keyTap('tab');
+    typeString('coverLetter.pdf');
+    await driver.sleep(750);
+    keyTap('down');
+    keyTap('enter');
+    await driver.sleep(750);
+    keyTap('tab');
+    keyTap('tab');
+    keyTap('down');
+    keyTap('enter');
+    return;
+  },
+  enterResume: async (driver) => {
+    try {
+      await driver.findElement(By.className('ia-SmartApplyCard')).click();
+      await driver.sleep(1000);
+    } catch (err) {
+      console.log(err);
+    }
+  },
+  enterCoverLetter: async (driver, coverLetter) => {
+    // Wait until either the PDF submission or write cover letter form is shown...
+    const strFlag = await driver.wait(async () => {
+
+      const pdfSubmitTest = await driver.findElements(By.xpath(`//div[contains(@class, 'file-question-upload-button')]//div[contains(@class, 'ia-SmartApplyCard-headerButton')]`));
+
+      const writeCoverLetterTest = await driver.findElements(By.xpath(`//*[contains(@id, 'write-cover-letter-selection-card')]//div//span`));
+
+
+      // PDF comes first...
+      if (pdfSubmitTest.length) {
+        return 'pdf';
+      };
+
+      if (writeCoverLetterTest.length) {
+        return 'write';
+      };
+    });
+
+
+    if (strFlag === 'pdf') {
+      console.log('pdf');
+      try {
+        await driver.findElement(By.xpath(`//div[contains(@class, 'file-question-upload-button')]//div[contains(@class, 'ia-SmartApplyCard-headerButton')]`)).click();
+        await module.exports.automatePDFUpload(driver);
       } catch (err) {
         console.log(err);
       }
-      return;
     }
+
+    if (strFlag === 'write') {
+      console.log('write');
+      try {
+        await driver.findElement(By.xpath(`//*[contains(@id, 'write-cover-letter-selection-card')]//div//span`)).click();
+        await module.exports.setWrittenCoverLetter(driver, coverLetter);
+      } catch (err) {
+        console.log(err);
+      };
+    };
   },
-
-  enterSupportingDocs: async (driver) => {
-    await driver.findElement(By.className('ia-continueButton')).click();
-  },
-
-  enterWorkExperience: async (driver) => {
-    await driver.wait(async () => {
-      let testOne = await driver.findElements(By.className('ia-WorkExperience'));
-      let testTwo = await driver.findElements(By.className('ia-SupportingDocuments'));
-
-      return (testOne.length || testTwo.length);
-    });
-
-    const workExperienceTest = await driver.findElements(By.className('ia-WorkExperience'));
-
-    if (workExperienceTest.length) {
-      await driver.findElement(By.tagName('input')).sendKeys(recentJobTitle.toString(), Key.TAB, recentJobWork.toString());
-      return true;
-    }
-  },
-}
+};
 

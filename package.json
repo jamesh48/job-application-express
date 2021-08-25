@@ -1,21 +1,33 @@
 {
   "name": "IndeedAutomation",
   "version": "1.0.0",
-  "description": "",
+  "description": "Selenium scripts to automate indeed cover letter generation and survey completion as well as uploading completed job applications into Huntr.co",
   "main": "index.js",
   "scripts": {
-    "apply": "node ./Apply/automateIndeed.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "pm2 start",
+    "stop": "pm2 stop Automate_Server",
+    "apply": "node -e 'require(\"./index.js\").AutomateIndeed()'",
+    "dump": "node -e 'require(\"./index.js\").AutomateHuntr()'",
+    "database": "npx sequelize db:drop && npx sequelize db:create && npx sequelize db:migrate"
   },
   "keywords": [],
-  "author": "",
+  "author": "James Hrivnak",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.21.1",
     "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "jsonresume-theme-actual-letter": "^0.1.4",
+    "pg": "^8.7.1",
+    "pm2": "^5.1.1",
+    "postgres": "^1.0.2",
+    "robotjs": "^0.6.0",
     "selenium-webdriver": "^4.0.0-beta.4",
+    "sequelize": "^6.6.5",
     "webdriver-manager": "^12.1.8"
   },
   "devDependencies": {
-    "chromedriver": "^92.0.1"
+    "chromedriver": "^92.0.1",
+    "sequelize-cli": "^6.2.0"
   }
 }

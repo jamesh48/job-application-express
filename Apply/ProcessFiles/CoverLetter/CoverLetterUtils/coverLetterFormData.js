@@ -21,14 +21,14 @@ module.exports = [
   },
   {
     title: 'interestedBecauseTwo',
-    defaultValue: 'I also like that',
+    defaultValue: 'I also like that we share a mutual passion for',
     classType: 'interestedBecause',
     lastOfSection: true,
     orderIndex: 1
   },
   {
     title: 'softwareInterestsOne',
-    defaultValue: 'I would be especially excited about the idea of working with (company) software because',
+    defaultValue: 'I would be especially excited about the idea of working with the (company) software stack because I see that it employs many of my favorite languages and technologies',
     options:
       [{
         title: 'Front-End',
@@ -61,13 +61,13 @@ module.exports = [
   },
   {
     title: 'applicationExample',
-    defaultValue: 'I have just finished working on several software engineering applications- my favorite technologies are front end technologies like React and its testing frameworks, but I particularly enjoy working on optimizing backend Relational Databases like mySQL and postgreSQL. For example, I recently worked on horizontally scaling an Amazon Web Services microservice to take in a large RPS which mainly required optimizing database queries.',
+    defaultValue: 'My favorite software engineering work involves optimizing relational databases, for example I recently worked on horizontally scaling an Amazon Web Services Microservice to take in a large RPS which mainly required optimizing database queries.',
     lastOfSection: false,
     orderIndex: 3
   },
   {
     title: 'interpersonalSkills',
-    defaultValue: `In addition, I also possess empathetic interpersonal skills that enable me to be a effective leader.`,
+    defaultValue: `In addition, I also possess empathetic interpersonal skills that enable me to be an effective leader.`,
     classType: 'interpersonalSkills',
     lastOfSection: true,
     orderIndex: 4

@@ -4,17 +4,19 @@ const {
   GenerateCoverLetterConfirmationFormStr
 } = require('./CoverLetterUtils/htmlInjectionScripts.js');
 
-const { parseFunction, getJobAndCompanyName, generateRelevantSkillsObj, handleSkills, handleNewSkill, removeMatchingSkillSetButtons, templateFormStrings } = require('./CoverLetterUtils/coverLetterUtils.js');
+const { parseFunction, disableInitialApplyButton, autoStartSurvey, getJobAndCompanyName, generateRelevantSkillsObj, handleSkills, handleNewSkill, removeMatchingSkillSetButtons, templateFormStrings } = require('./CoverLetterUtils/coverLetterUtils.js');
 
 
 const paths = require('./CoverLetterUtils/coverLetterPaths.js');
 
-const { handleSelectorFunc, pathToJobTitle, pathToCompanyNameSpan, pathToCompanyNameLink, jobDescriptionTextPath } = paths;
+const { handleSelectorFunc, pathToJobTitle, pathToCompanyNameSpan, pathToCompanyNameLink, pathToAdvertisedSalary, jobDescriptionTextPath, pathToRemoteIndication, pathToPostURL, pathToJobLocation } = paths;
 
 const coverLetterFormData = require('./CoverLetterUtils/coverLetterFormData.js');
 const coverLetterTemplate = require('./CoverLetterUtils/coverLetterTemplate.js');
 
 module.exports = async function (driver) {
+  await disableInitialApplyButton(driver);
+
   // This Script Injects Automate Indeed Buttons on each list container, as well as relevant skills on each click.
   await driver.executeAsyncScript(
     `
@@ -24,17 +26,15 @@ module.exports = async function (driver) {
       ${JSON.stringify(paths)},
       ${String(handleSelectorFunc)}
     );
+    window.scrollTo(0, 0);
     callback('ok')
     `
   );
 
-  // await driver.quit();
-
-
   // Gets the job and company name from the highlighted list container. (obj)
-  const demographicObj = await getJobAndCompanyName(driver, pathToJobTitle.name, pathToCompanyNameSpan.name, pathToCompanyNameLink.name);
+  const demographicObj = await getJobAndCompanyName(driver, pathToJobTitle.name, pathToCompanyNameSpan.name, pathToCompanyNameLink.name, pathToAdvertisedSalary.name, pathToRemoteIndication.name, pathToPostURL.name, pathToJobLocation.name);
 
-  const relevantSkillsObj = await generateRelevantSkillsObj(driver, jobDescriptionTextPath.name);
+  const [jobDescription, relevantSkillsObj] = await generateRelevantSkillsObj(driver, jobDescriptionTextPath.name);
 
   const resultObj = await driver.executeAsyncScript(
     `
@@ -77,12 +77,36 @@ module.exports = async function (driver) {
     try {
       const finalCoverLetterFromClient = await ${GenerateCoverLetterConfirmationFormStr}(${JSON.stringify(coverLetterTemplated)}
       );
+
       callback(finalCoverLetterFromClient);
     } catch (err) {
       console.log(err);
     }
     `
   );
+  await autoStartSurvey(driver);
 
-  return finalCoverLetter;
+  const jobInfoObj = {
+    postURL: demographicObj.postURL,
+    jobLocation: demographicObj.jobLocation,
+    jobTitle: demographicObj.jobTitle,
+    companyName: demographicObj.companyName,
+    jobIsRemote: demographicObj.jobIsRemote,
+    advertisedSalary: demographicObj.advertisedSalary,
+    relevantSkillsStrong: relevantSkillsObj.strong.reduce((total, item) => {
+      if (item.value) {
+        total.push(item.value);
+      }
+      return total;
+    }, []),
+    relevantSkillsAcceptable: relevantSkillsObj.acceptable.reduce((total, item) => {
+      if (item.value) {
+        total.push(item.value)
+      }
+      return total;
+    }, []),
+    jobDescription: jobDescription
+  };
+
+  return [jobInfoObj, finalCoverLetter];
 }

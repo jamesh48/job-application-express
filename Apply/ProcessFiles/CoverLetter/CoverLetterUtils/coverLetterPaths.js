@@ -65,13 +65,26 @@ module.exports = {
     selector: 'xpath',
     name: `//*[contains(@class, 'vjs-highlight')]//span[contains(@class, 'companyName')]`
   },
+  pathToAdvertisedSalary: {
+    selector: 'xpath',
+    name: `//*[contains(@class, 'vjs-highlight')]//span[contains(@class, 'salary')]`
+  },
+  pathToJobLocation: {
+    selector: 'xpath',
+    name: `//*[contains(@class, 'vjs-highlight')]//div[contains(@class, 'companyLocation')]`
+  },
+  pathToRemoteIndication: {
+    selector: 'xpath',
+    name: `//*[contains(@class, 'vjs-highlight')]//div[contains(@class, 'companyLocation')]//*[contains(., 'Remote')]`
+  },
   pathToCompanyNameLink: {
     selector: 'xpath',
     name: `//*[contains(@class, 'vjs-highlight')]//span[contains(@class, 'companyName')]//a`
   },
-
-
-
+  pathToPostURL: {
+    selector: 'xpath',
+    name: `//*[contains(@class, 'vjs-highlight')]`
+  },
   // Ids for second injection function
   coverLetterParentPath: {
     selector: 'id',
