@@ -8,13 +8,15 @@
     "stop": "pm2 stop Automate_Server",
     "apply": "node -e 'require(\"./index.js\").AutomateIndeed()'",
     "dump": "node -e 'require(\"./index.js\").AutomateHuntr()'",
-    "database": "npx sequelize db:drop && npx sequelize db:create && npx sequelize db:migrate"
+    "database": "npx sequelize db:drop && npx sequelize db:create && npx sequelize db:migrate",
+    "count": "node Postgres_Scripts/count.js"
   },
   "keywords": [],
   "author": "James Hrivnak",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.21.1",
+    "colors": "^1.4.0",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "jsonresume-theme-actual-letter": "^0.1.4",
@@ -27,7 +29,7 @@
     "webdriver-manager": "^12.1.8"
   },
   "devDependencies": {
-    "chromedriver": "^92.0.1",
+    "chromedriver": "^92.0.2",
     "sequelize-cli": "^6.2.0"
   }
 }

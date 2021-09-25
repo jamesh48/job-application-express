@@ -43,6 +43,9 @@ module.exports = async () => {
     // Wait for the Modal Container to Appear...
     await driver.wait(until.elementLocated(By.xpath(`//div[contains(@class, 'ModalContainer')]//input`)));
 
+    // This timeout helps the script enter the company name correctly.
+    await driver.sleep(1000);
+
     // Company Selection and Job Title Input Elements
     const [companySelectionInputEl, jobTitleInputEl] = await driver.findElements(By.xpath(`//div[contains(@class, 'ModalContainer')]//input`));
 

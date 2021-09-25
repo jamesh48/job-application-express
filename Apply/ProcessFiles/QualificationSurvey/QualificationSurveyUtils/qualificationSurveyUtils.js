@@ -56,6 +56,7 @@ module.exports = {
     keyTap('tab');
     keyTap('tab');
     keyTap('down');
+    keyTap('c');
     keyTap('enter');
     return;
   },
